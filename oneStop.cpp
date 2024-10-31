@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <string>
 #include <ctime>
 #include <algorithm>
@@ -7,7 +8,9 @@
 
 using namespace std;
 
-class Ticket {
+
+class Ticket
+{
 public:
     int id;
     string name;
@@ -15,96 +18,284 @@ public:
     string description;
     time_t creationTime;
     string status;
-    Ticket* next;
+    Ticket *next;
+    Ticket()
+    {
+    }
 
-    Ticket(int i, const string& n, int p, const string& d)
+    Ticket(int i, const string &n, int p, const string &d)
         : id(i), name(n), priority(p), description(d),
           creationTime(time(nullptr)), status("open"), next(nullptr) {}
+    void displayTicket() const
+    {
+        cout << "Ticket ID: " << id << "\n";
+        cout << "Name: " << name << "\n";
+        cout << "Priority: " << priority << "\n";
+        cout << "Description: " << description << "\n";
+
+        cout << "Creation Time: " << ctime(&creationTime);
+
+        cout << "Status: " << status << "\n";
+    }
+};
+class Stack
+{
+private:
+    Ticket *arr;
+    int capacity;
+    int top;
+
+public:
+    Stack() : top(-1), capacity(0), arr(nullptr) {}
+
+    void setSize(int n)
+    {
+        capacity = n;
+        arr = new Ticket[capacity];
+    }
+
+    ~Stack()
+    {
+        delete[] arr;
+    }
+
+    bool isEmpty() const
+    {
+        return top == -1;
+    }
+
+    bool isFull() const
+    {
+        return top == capacity - 1;
+    }
+
+    void push(const Ticket &value)
+    { // Accept by reference
+        if (isFull())
+        {
+            cout << "Stack is full\n";
+            return;
+        }
+        arr[++top] = value;
+    }
+
+    Ticket pop()
+    {
+        if (isEmpty())
+        {
+            cout << "Stack is empty\n";
+            return Ticket(); // Return default Ticket on empty stack
+        }
+        return arr[top--];
+    }
+
+    Ticket peek() const
+    {
+        if (isEmpty())
+        {
+            cout << "Stack is empty\n";
+            return Ticket();
+        }
+        return arr[top];
+    }
+
+    void print() const
+    {
+        if (isEmpty())
+        {
+            cout << "Stack is empty\n";
+            return;
+        }
+        for (int i = 0; i <= top; ++i)
+        {
+            cout << arr[i].id << " ";
+        }
+        cout << endl;
+    }
+};
+class Queue {
+private:
+    int front, rear;
+    int size;
+    Ticket** queue;  // Array of Ticket pointers
+
+public:
+    Queue() : front(-1), rear(-1), size(0), queue(nullptr) {}
+
+    void setSize(int n) {
+        size = n;
+        queue = new Ticket*[size];
+    }
+
+    ~Queue() {
+        delete[] queue;
+    }
+
+    void enqueue(Ticket* value) {
+        if (rear == size - 1) {
+            cout << "Queue is full. Cannot enqueue.\n";
+        } else {
+            if (front == -1) {
+                front = 0;
+            }
+            rear++;
+            queue[rear] = value;
+            cout << "Ticket ID " << value->id << " enqueued to the queue.\n";
+        }
+    }
+
+    void dequeue() {
+        if (front == -1 || front > rear) {
+            cout << "Queue is empty. Cannot dequeue.\n";
+        } else {
+            cout << "Ticket ID " << queue[front]->id << " dequeued from the queue.\n";
+            front++;
+        }
+    }
+
+    Ticket* peekFront() {
+        if (front == -1 || front > rear) {
+            cout << "Queue is empty.\n";
+            return nullptr;
+        }
+        return queue[front];
+    }
+
+    bool isEmpty() {
+        return (front == -1 || front > rear);
+    }
 };
 
-class Agent {
+
+class Agent
+{
 public:
     int id;
     string name;
-    Ticket* assignedTickets;
+    vector<Ticket> assignedTickets;
+    int numOfTicket;
     bool available;
-
-    Agent() : id(0), name(""), assignedTickets(nullptr), available(true) {}
-    Agent(int i, const string& n) : id(i), name(n), assignedTickets(nullptr), available(true) {}
+    Agent() : id(0), name("Asad Jafri"), available(true), numOfTicket(0)
+    {
+    }
+    bool isfull()
+    {
+        if (numOfTicket >= 5)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    bool assignTicket(Ticket *t)
+    {
+        if (!isfull())
+        {
+            assignedTickets.push_back(*t);
+            numOfTicket++;
+        }
+        else
+        {
+            cout << "Agent not available!" << "\n";
+            return false;
+        }
+        return true ;
+    }
+    void removeTicket(Ticket *t)
+    {
+        for (int i = 0; i < numOfTicket; i++)
+        { 
+            if (assignedTickets[i].id == t->id)
+            {
+                assignedTickets.erase(assignedTickets.begin() + i);
+                numOfTicket--;
+                return;
+            }
+        }
+    }
+    void displayAllTicket()
+    {
+        for (int i = 0; i < numOfTicket; i++)
+        {
+            assignedTickets[i].displayTicket();
+        }
+    }
+    bool status()
+    {
+        return available;
+    }
 };
 
-class TicketManager {
+class TicketManager
+{
 private:
-    Ticket* head;
-    Agent agents[10];
-    int agentCount;
+    Ticket *head;
 
-public: 
-    TicketManager() : head(nullptr), agentCount(0) {}
+public:
+    TicketManager() : head(nullptr)
+    {
+    }
 
-    void addTicket(int id, const string& cust_name, int p, const string& d) {
-        Ticket* newTicket = new Ticket(id, cust_name, p, d);
-        if (!head) {
+    void addTicket(int id, const string &cust_name, int p, const string &d)
+    {
+        Ticket *newTicket = new Ticket(id, cust_name, p, d);
+        if (!head)
+        {
             head = newTicket;
-        } else {
-            Ticket* temp = head;
-            while (temp->next) {
+        }
+        else
+        {
+            Ticket *temp = head;
+            while (temp->next)
+            {
                 temp = temp->next;
             }
             temp->next = newTicket;
         }
         cout << "Ticket added: ID " << id << endl;
-        assignTicketToAgent(newTicket);
     }
 
-    void removeTicket(int id) {
-        Ticket* curr = head;
-        Ticket* prev = nullptr;
-        while (curr && curr->id != id) {
+    void removeTicket(int id)
+    {
+        Ticket *curr = head;
+        Ticket *prev = nullptr;
+        while (curr && curr->id != id)
+        {
             prev = curr;
             curr = curr->next;
         }
-        if (!curr) {
+        if (!curr)
+        {
             cout << "Ticket not found: ID " << id << endl;
             return;
         }
-        if (prev) {
+        if (prev)
+        {
             prev->next = curr->next;
-        } else {
+        }
+        else
+        {
             head = curr->next;
         }
         delete curr;
         cout << "Ticket removed: ID " << id << endl;
     }
 
-    void assignTicketToAgent(Ticket* ticket) {
-        for (int i = 0; i < agentCount; i++) {
-            if (agents[i].available) {
-                Ticket* agentTicket = agents[i].assignedTickets;
-                if (!agentTicket) {
-                    agents[i].assignedTickets = ticket;
-                } else {
-                    while (agentTicket->next) {
-                        agentTicket = agentTicket->next;
-                    }
-                    agentTicket->next = ticket;
-                }
-                cout << "Assigned Ticket ID " << ticket->id << " to Agent " << agents[i].name << endl;
-                return;
-            }
-        }
-        cout << "No available agents to assign Ticket ID " << ticket->id << endl;
-    }
-
-    void searchTicket(const string& query) {
+    void searchTicket(const string &query)
+    {
         int ticketID = -1;
-        if (isdigit(query[0])) {
+        if (isdigit(query[0]))
+        {
             ticketID = stoi(query);
         }
 
-        Ticket* curr = head;
-        while (curr) {
-            if (curr->id == ticketID || curr->name == query) {
+        Ticket *curr = head;
+        while (curr)
+        {
+            if (curr->id == ticketID || curr->name == query)
+            {
                 cout << "Ticket found: ID " << curr->id << ", Customer: " << curr->name << ", Status: " << curr->status << endl;
                 return;
             }
@@ -113,40 +304,41 @@ public:
         cout << "Ticket not found for query: " << query << endl;
     }
 
-    void printTickets() {
-        Ticket* curr = head;
-        while (curr) {
+    void printTickets()
+    {
+        Ticket *curr = head;
+        while (curr)
+        {
             cout << "Ticket ID: " << curr->id << ", Customer: " << curr->name
                  << ", Priority: " << curr->priority << ", Status: " << curr->status << endl;
             curr = curr->next;
         }
     }
 
-    void addAgent(int id, const string& name) {
-        if (agentCount < 10) {
-            agents[agentCount++] = Agent(id, name);
-            cout << "Agent added: ID " << id << ", Name " << name << endl;
-        } else {
-            cout << "Max agents reached!" << endl;
-        }
-    }
-
-    void sortTickets() {
-        if (defaultsort == "bubblesort") {
+    void sortTickets()
+    {
+        if (defaultsort == "bubblesort")
+        {
             bubbleSort();
-        } else if (advancesort == "quicksort") {
+        }
+        else if (advancesort == "quicksort")
+        {
             quickSort(head);
         }
         cout << "Tickets sorted." << endl;
     }
 
-    void bubbleSort() {
+    void bubbleSort()
+    {
         bool swapped;
-        do {
+        do
+        {
             swapped = false;
-            Ticket* curr = head;
-            while (curr && curr->next) {
-                if (curr->priority > curr->next->priority) {
+            Ticket *curr = head;
+            while (curr && curr->next)
+            {
+                if (curr->priority > curr->next->priority)
+                {
                     swap(curr->id, curr->next->id);
                     swap(curr->name, curr->next->name);
                     swap(curr->priority, curr->next->priority);
@@ -158,45 +350,63 @@ public:
         } while (swapped);
     }
 
-    void quickSort(Ticket* start) {
-        if (!start) return;
-        Ticket* pivot = partition(start);
+    void quickSort(Ticket *start)
+    {
+        if (!start)
+            return;
+        Ticket *pivot = partition(start);
         quickSort(start);
         quickSort(pivot->next);
     }
 
-    Ticket* partition(Ticket* start) {
+    Ticket *partition(Ticket *start)
+    {
         int pivotValue = start->priority;
-        Ticket* lessHead = nullptr;
-        Ticket* lessTail = nullptr;
-        Ticket* equalHead = nullptr;
-        Ticket* equalTail = nullptr;
-        Ticket* greaterHead = nullptr;
-        Ticket* greaterTail = nullptr;
+        Ticket *lessHead = nullptr;
+        Ticket *lessTail = nullptr;
+        Ticket *equalHead = nullptr;
+        Ticket *equalTail = nullptr;
+        Ticket *greaterHead = nullptr;
+        Ticket *greaterTail = nullptr;
 
-        Ticket* curr = start;
-        while (curr) {
-            if (curr->priority < pivotValue) {
-                if (!lessHead) {
+        Ticket *curr = start;
+        while (curr)
+        {
+            if (curr->priority < pivotValue)
+            {
+                if (!lessHead)
+                {
                     lessHead = curr;
                     lessTail = curr;
-                } else {
+                }
+                else
+                {
                     lessTail->next = curr;
                     lessTail = curr;
                 }
-            } else if (curr->priority == pivotValue) {
-                if (!equalHead) {
+            }
+            else if (curr->priority == pivotValue)
+            {
+                if (!equalHead)
+                {
                     equalHead = curr;
                     equalTail = curr;
-                } else {
+                }
+                else
+                {
                     equalTail->next = curr;
                     equalTail = curr;
                 }
-            } else {
-                if (!greaterHead) {
+            }
+            else
+            {
+                if (!greaterHead)
+                {
                     greaterHead = curr;
                     greaterTail = curr;
-                } else {
+                }
+                else
+                {
                     greaterTail->next = curr;
                     greaterTail = curr;
                 }
@@ -204,60 +414,140 @@ public:
             curr = curr->next;
         }
 
-        if (lessTail) lessTail->next = nullptr;
-        if (equalTail) equalTail->next = nullptr;
-        if (greaterTail) greaterTail->next = nullptr;
+        if (lessTail)
+            lessTail->next = nullptr;
+        if (equalTail)
+            equalTail->next = nullptr;
+        if (greaterTail)
+            greaterTail->next = nullptr;
 
-        if (lessHead) {
+        if (lessHead)
+        {
             head = lessHead;
             lessTail->next = equalHead;
-        } else {
+        }
+        else
+        {
             head = equalHead;
         }
 
-        if (equalHead) equalTail->next = greaterHead;
+        if (equalHead)
+            equalTail->next = greaterHead;
         return equalTail ? equalTail : greaterHead;
     }
 
-    ~TicketManager() {
-        while (head) {
-            Ticket* temp = head;
+    ~TicketManager()
+    {
+        while (head)
+        {
+            Ticket *temp = head;
             head = head->next;
             delete temp;
         }
     }
 };
+class TransactionLog {
+public:
+    Stack s;
+    Queue q;
 
-int main() {
-    cout << "Welcome to OneStop Management System!" << "\n" << "\n";
+    TransactionLog() {
+        s.setSize(5);
+        q.setSize(10);
+    }
+
+    void assignTicket(Ticket* T, Agent* a) {
+        bool flag = a->assignTicket(T);
+        if (!flag) {
+            q.enqueue(T); 
+        }
+        s.push(*T); 
+    }
+
+    void removeTicket(Ticket* T, Agent* a) {
+        a->removeTicket(T);
+        s.pop(); 
+    }
+
+    ~TransactionLog() {
+        
+    }
+};
+
+int main()
+{
+    cout << "Welcome to OneStop Management System!" << "\n"
+         << "\n";
     cout << "First, you need to tell us your preferred sort and search algorithms. Your data can be processed accordingly." << "\n";
     initializeConfig();
-
+    TransactionLog tr;
     TicketManager manager;
+    Agent agent;
 
-    manager.addAgent(1, "IT Support");
-    manager.addAgent(2, "Admin Support");
-    manager.addAgent(3, "Accounts Support");
-    manager.addAgent(4, "Academic Support 1");
-    manager.addAgent(5, "Academic Support 2");
-    manager.addAgent(6, "Academic Support 3");
+    int choice;
+    do
+    {
+        cout << "\nMenu:\n";
+        cout << "1. Add Ticket\n";
+        cout << "2. Remove Ticket\n";
+        cout << "3. Search Ticket\n";
+        cout << "4. Print All Tickets\n";
+        cout << "5. Sort Tickets\n";
+        cout << "6. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
 
-    manager.addTicket(1, "Alice", 1, "IT issue");
-    manager.addTicket(2, "Bob", 2, "Account question");
-    manager.addTicket(3, "Charlie", 3, "General inquiry");
-    manager.addTicket(4, "Dave", 1, "Network problem");
-    manager.addTicket(5, "Eve", 1, "Login issue");
+        switch (choice)
+        {
+        case 1:
+        {
+            int id, priority;
+            string name, description;
+            cout << "Enter Ticket ID: ";
+            cin >> id;
+            cout << "Enter Customer Name: ";
+            cin.ignore();
+            getline(cin, name);
+            cout << "Enter Priority (1 = High, 2 = Medium, 3 = Low): ";
+            cin >> priority;
+            cout << "Enter Description: ";
+            cin.ignore();
+            getline(cin, description);
+            manager.addTicket(id, name, priority, description);
+            break;
+        }
+        case 2:
+        {
+            int id;
+            cout << "Enter Ticket ID to remove: ";
+            cin >> id;
+            manager.removeTicket(id);
+            break;
+        }
+        case 3:
+        {
+            string query;
+            cout << "Enter Ticket ID or Customer Name to search: ";
+            cin.ignore();
+            getline(cin, query);
+            manager.searchTicket(query);
+            break;
+        }
+        case 4:
+            manager.printTickets();
+            break;
 
-    manager.printTickets();
-
-    manager.removeTicket(2);
-
-    manager.searchTicket("1");
-    manager.searchTicket("Alice");
-
-    cout << "Sorting tickets:" << endl;
-    manager.sortTickets();
-    manager.printTickets();
+        case 5:
+            manager.sortTickets();
+            manager.printTickets();
+            break;
+        case 6:
+            cout << "Exiting program." << endl;
+            break;
+        default:
+            cout << "Invalid choice. Please try again." << endl;
+        }   
+    } while (choice != 6);
 
     return 0;
 }
