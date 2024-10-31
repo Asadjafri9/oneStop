@@ -1,2 +1,2 @@
 # oneStop
- This my Project for one Stop system in FAST NUCES
+ This is my Project for One Stop system in FAST NUCES
