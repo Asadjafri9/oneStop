@@ -3,10 +3,10 @@
 
 #include <string>
 
-extern std::string defaultsort;       // Declaration
-extern std::string advancesort;       // Declaration
-extern std::string searchtechnique;   // Declaration
+extern std::string defaultsort;     
+extern std::string advancesort;       
+extern std::string searchtechnique;   
 
-void initializeConfig();               // Function declaration
+void initializeConfig();               
 
-#endif // CONFIG_H
+#endif 

@@ -1,18 +1,18 @@
 #include <iostream>
 #include "config.h"
-
-std::string defaultsort ;       
-std::string advancesort  ;       
-std::string searchtechnique  ;  
+using namespace std ; 
+  string defaultsort ;       
+  string advancesort  ;       
+  string searchtechnique  ;  
 
 
 void initializeConfig() {
-    std::cout << "Enter default sort: ";
-    std::cin >> defaultsort;
+      cout << "Enter default sort: ";
+      cin >> defaultsort;
 
-    std::cout << "Enter advanced sort: ";
-    std::cin >> advancesort;
+      cout << "Enter advanced sort: ";
+      cin >> advancesort;
 
-    std::cout << "Enter search technique: ";
-    std::cin >> searchtechnique;
+      cout << "Enter search technique: ";
+      cin >> searchtechnique;
 }
